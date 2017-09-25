@@ -1,14 +1,14 @@
 #!/bin/bash
 # run like this:
 # curl -sO https://raw.githubusercontent.com/renatofrota/search-replace-ssl/master/search-replace-ssl.bash && bash search-replace-ssl.bash
-echo -e "\n\tsearch-replace-ssl - v0.0.1 - https://github.com/renatofrota/search-replace-ssl\n";
+echo -e "\n\tsearch-replace-ssl - v0.0.2 - https://github.com/renatofrota/search-replace-ssl\n";
 home=$(wp option get home --skip-plugins --skip-themes | cut -d / -f 3-);
 echo "HOME: $home";
 wp=$(echo $home | sed 's|^www\.||');
 echo "DOMAIN: $wp";
 [[ "$home" == "www."* ]] && prefix="www." || prefix="";
 read -${BASH_VERSION+e}rp "Search-replace to https? (y/N) " -n 1 sr;
-if [[ "$sr" == (1|y|Y|s|S) ]]; then
+if [[ "$sr" =~ (1|y|Y|s|S) ]]; then
     wp db export ${HOME}/$(date +%F-%H-%M-%S)-$(echo ${wp} | cut -d / -f 1)-backup.sql;
     echo "Step 1 - Replacing http://(www.)${wp} -> https://${prefix}${wp}";
     wp search-replace --precise --recurse-objects --all-tables --regex "https?:\/\/(www\\.)?${wp}" "https://${prefix}${wp}" --skip-themes --skip-plugins | grep -w -v "0\|skipped";
@@ -22,7 +22,7 @@ if [[ "$sr" == (1|y|Y|s|S) ]]; then
 fi
 echo
 read -${BASH_VERSION+e}rp "Add redirection rules to .htaccess? (y/N) " -n 1 htrules;
-if [[ "$htrules" == (1|y|Y|s|S) ]]; then
+if [[ "$htrules" =~ (1|y|Y|s|S) ]]; then
     if [ "${wp}" != "${home}" ]; then
         wp1="www.";
         wp2="";
