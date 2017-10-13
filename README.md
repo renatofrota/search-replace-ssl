@@ -1,6 +1,10 @@
 # search-replace-ssl
 A script to replace all occurrences of a WordPress website's domain name with http:// protocol hardcoded in the database with it's corresponding URL using https:// protocol
 
+## Dependencies
+
+`wp-cli` is required (available as `wp` command on your shell environment)
+
 ## How to use
 
 From the WP root directory (where wp-blog-header.php resides) run:

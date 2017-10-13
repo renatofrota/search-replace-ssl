@@ -1,7 +1,7 @@
 #!/bin/bash
 # run like this:
 # curl -sO https://raw.githubusercontent.com/renatofrota/search-replace-ssl/master/search-replace-ssl.bash && bash search-replace-ssl.bash
-echo -e "\n\tsearch-replace-ssl - v0.0.2 - https://github.com/renatofrota/search-replace-ssl\n";
+echo -e "\n\tsearch-replace-ssl - v0.0.3 - https://github.com/renatofrota/search-replace-ssl\n";
 home=$(wp option get home --skip-plugins --skip-themes | cut -d / -f 3-);
 echo "HOME: $home";
 wp=$(echo $home | sed 's|^www\.||');
@@ -9,15 +9,16 @@ echo "DOMAIN: $wp";
 [[ "$home" == "www."* ]] && prefix="www." || prefix="";
 read -${BASH_VERSION+e}rp "Search-replace to https? (y/N) " -n 1 sr;
 if [[ "$sr" =~ (1|y|Y|s|S) ]]; then
-    wp db export ${HOME}/$(date +%F-%H-%M-%S)-$(echo ${wp} | cut -d / -f 1)-backup.sql;
-    echo "Step 1 - Replacing http://(www.)${wp} -> https://${prefix}${wp}";
-    wp search-replace --precise --recurse-objects --all-tables --regex "https?:\/\/(www\\.)?${wp}" "https://${prefix}${wp}" --skip-themes --skip-plugins | grep -w -v "0\|skipped";
+    wpr=$(echo ${wp} | cut -d / -f 1);
+    wp db export ${HOME}/$(date +%F-%H-%M-%S)-${wpr}-backup.sql;
+    echo "Step 1 - Replacing http://(www.)${wpr} -> https://${prefix}${wpr}";
+    wp search-replace --precise --recurse-objects --all-tables --regex "https?:\/\/(www\\.)?${wpr}" "https://${prefix}${wpr}" --skip-themes --skip-plugins | grep -w -v "0\|skipped";
     wp cache flush --skip-themes --skip-plugins;
-    echo "Step 2 - Replacing http:\/\/(www.)${wp} -> https:\/\/${prefix}${wp}";
-    wp search-replace --precise --recurse-objects --all-tables "https?:\/\/(www\\.)?${wp}" "https:\/\/${prefix}${wp}" --skip-themes --skip-plugins | grep -w -v "0\|skipped";
+    echo "Step 2 - Replacing http:\/\/(www.)${wpr} -> https:\/\/${prefix}${wpr}";
+    wp search-replace --precise --recurse-objects --all-tables "https?:\/\/(www\\.)?${wpr}" "https:\/\/${prefix}${wpr}" --skip-themes --skip-plugins | grep -w -v "0\|skipped";
     wp cache flush --skip-themes --skip-plugins;
-    echo "Step 3 - Replacing http%3A%2F%2F(www.)${wp} -> https%3A%2F%2F${prefix}${wp}";
-    wp search-replace --precise --recurse-objects --all-tables "https?%3A%2F%2F(www\\.)?${wp}" "https%3A%2F%2F${prefix}${wp}" --skip-themes --skip-plugins | grep -w -v "0\|skipped";
+    echo "Step 3 - Replacing http%3A%2F%2F(www.)${wpr} -> https%3A%2F%2F${prefix}${wpr}";
+    wp search-replace --precise --recurse-objects --all-tables "https?%3A%2F%2F(www\\.)?${wpr}" "https%3A%2F%2F${prefix}${wpr}" --skip-themes --skip-plugins | grep -w -v "0\|skipped";
     wp cache flush --skip-themes --skip-plugins;
 fi
 echo
@@ -32,7 +33,7 @@ if [[ "$htrules" =~ (1|y|Y|s|S) ]]; then
         wp2="www\.";
         wp3="remove";
     fi;
-    wpe=$(echo $wp | sed 's|\.|\\.|g' | sed 's|^www\\.||');
+    wpe=$(echo $wp | sed 's|\.|\\.|g' | sed 's|^www\\.||' | cut -d / -f 1);
     content="# BEGIN HTTPS
 # force https:// (and ${wp3} www prefix) in a single redirection
 # prevent 'chained redirects' reducing 'TTFB' and improving scores
